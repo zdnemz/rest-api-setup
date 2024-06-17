@@ -63,7 +63,8 @@ export const sayHello = () => "hello world";
 You can import `sayHello` easily:
 
 ```typescript
-import { sayHello } from "@/controllers";
+import { user } from "@/controllers";
+user.sayHello()
 ```
 
 This feature is integrated with `nodemon`, ensuring that the application refreshes automatically with each change, facilitating rapid development.
