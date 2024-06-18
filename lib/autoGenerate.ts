@@ -15,7 +15,10 @@ function getRoutes(dir: string): Route[] {
 
     if (stat.isDirectory()) {
       generateIndexFile(filePath, file);
-      const indexPath = path.join(filePath, "index.ts");
+      const indexPath = path.join(
+        filePath,
+        dir.includes(path.sep + "types") ? "index.d.ts" : "index.ts"
+      );
 
       if (fs.existsSync(indexPath)) {
         routes.push({
@@ -26,7 +29,7 @@ function getRoutes(dir: string): Route[] {
     } else {
       const ext = path.extname(file);
       if (
-        (ext === ".ts" || ext === ".js") &&
+        (ext === ".ts" || ext === ".d.ts") &&
         path.basename(file) !== "index.ts"
       ) {
         routes.push({
@@ -46,7 +49,8 @@ function generateIndexFile(dir: string, file: string): void {
     const relativePath = path
       .relative(dir, route.path)
       .replace(/\\/g, "/")
-      .split(/\/index\.ts$/)[0];
+      .split(/\/index\.(d.ts|ts)$/)[0];
+
     if (route.alias) {
       return `export ${file === "types" ? "type " : ""}* as ${
         route.alias
@@ -59,10 +63,11 @@ function generateIndexFile(dir: string, file: string): void {
   });
 
   const exportFileContent = exportStatements.join("\n");
-  const indexPath = !dir.includes(path.sep + "routes" + path.sep)
-    ? path.join(dir, "index.ts")
+  const indexPath = !dir.includes(path.sep + "routes")
+    ? !dir.includes(path.sep + "types")
+      ? path.join(dir, "index.ts")
+      : path.join(dir, "index.d.ts")
     : "";
-
   if (indexPath) {
     fs.writeFileSync(indexPath, exportFileContent);
   }
